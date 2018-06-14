@@ -1,0 +1,34 @@
+load("//tools:qt5.bzl", "qt_cc_library")
+
+qt_cc_library(
+    name = "rrt_visualizer",
+    hdr = "rrt_visualizer.h",
+		src = "rrt_visualizer.cc",
+    deps = [
+        "//:rrt",
+        "@qt5//:qt_core",
+        "@qt5//:qt_widgets",
+        "@qt5//:qt_gui",
+    ],
+)
+
+qt_cc_library(
+    name = "test_window",
+    hdr = "test_window.h",
+		src = "test_window.cc",
+    deps = [
+        "//:rrt",
+        ":rrt_visualizer",
+        "@qt5//:qt_core",
+        "@qt5//:qt_widgets",
+        "@qt5//:qt_gui",
+    ],
+)
+
+cc_binary(
+    name = "rrt_test",
+    srcs = ["rrt_test.cc"],
+    deps = [
+        ":test_window",
+    ]
+)

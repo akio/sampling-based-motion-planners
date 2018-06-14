@@ -1,0 +1,7 @@
+cc_library(
+	name = "rrt",
+	hdrs = ["include/rrt.h"],
+	srcs = ["src/rrt.cc"],
+	includes = ["include"],
+	visibility = ["//visibility:public"],
+)
