@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QApplication>
 
+#include "rrt_visualizer.h"
 #include "rrt.h"
 
 class MainWindow : public QMainWindow {
@@ -15,7 +16,10 @@ class MainWindow : public QMainWindow {
 
   void HandleButtonClicked();
 
+  void HandleAlgorithmChanged(const QString& text);
  private:
-  std::unique_ptr<rrt::Rrt> rrt_;
+  std::map<std::string, std::shared_ptr<rrt::PlannerInterface>> planners_;
+  std::shared_ptr<rrt::PlannerInterface> current_planner_;
+  RrtVisualizer* visualizer_;
 };
 

@@ -189,21 +189,29 @@ bool BidirectionalRrt::Solve(const NodePtr& init, const NodePtr& goal) {
       break;
     }
     ++i;
-		NodePtr x_random = space_->Sample();
+		NodePtr x_rand = space_->Sample();
     NodePtr x_new;
-
+    if (Extend(init_nodes_, init_nn_, x_rand, x_new) != RrtStatus::kTrapped) {
+      NodePtr x_new2;
+      if (Connect(goal_nodes_, goal_nn_, x_new, x_new2) == RrtStatus::kReached) {
+        return true;
+      }
+    }
+    std::swap(init_nodes_, goal_nodes_);
+    std::swap(init_nn_, goal_nn_);
   }
   return false;
 }
 
-RrtStatus BidirectionalRrt::Extend(const NodePtr& x_sample, NodePtr& out_x_new) {
-  auto x_near = init_nn_->Query(x_sample);
+RrtStatus BidirectionalRrt::Extend(std::vector<NodePtr>& nodes, const NearestNeighborPtr& nn,
+                                   const NodePtr& x_sample, NodePtr& out_x_new) {
+  auto x_near = nn->Query(x_sample);
   assert(x_near);
   auto x_new = space_->NewNode(x_near, x_sample);
   if (x_new) {
     out_x_new = x_new;
-    init_nn_->Add(x_new);
-    init_nodes_.push_back(x_new);
+    nn->Add(x_new);
+    nodes.push_back(x_new);
     if (x_sample->Distance(*x_new) <= std::numeric_limits<double>::epsilon()) {
       return RrtStatus::kReached;
     } else {
@@ -211,6 +219,18 @@ RrtStatus BidirectionalRrt::Extend(const NodePtr& x_sample, NodePtr& out_x_new) 
     }
   }
   return RrtStatus::kTrapped;
+}
+
+RrtStatus BidirectionalRrt::Connect(std::vector<NodePtr>& nodes, const NearestNeighborPtr& nn,
+                                    const NodePtr& x_sample, NodePtr& out_x_new) {
+  RrtStatus status;
+  while (true) {
+    status = Extend(nodes, nn, x_sample, out_x_new);
+    if (status != RrtStatus::kAdvanced) {
+      break;
+    }
+  }
+  return status;
 }
 
 void BidirectionalRrt::Clear() {

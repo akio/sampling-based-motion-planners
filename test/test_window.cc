@@ -1,28 +1,50 @@
 #include "test_window.h"
 
 #include <iostream>
+#include <map>
 
 #include "QtCore/QTimer"
 #include "QtWidgets/QGridLayout"
 #include "QtWidgets/QHBoxLayout"
 #include "QtWidgets/QPushButton"
-
-#include "rrt_visualizer.h"
+#include "QtWidgets/QComboBox"
+#include "QtWidgets/QRadioButton"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   auto space = std::make_shared<rrt::Space2D>(0, 1000, 0, 1000, 10.0);
-  space->AddCollisionBox(200, 200, 200, 200);
-  rrt_.reset(new rrt::Rrt(space));
-  rrt_->set_goal_tolerance(5.0);
-  rrt_->set_use_connect(true);
+  space->AddCollisionBox(400, 0, 200, 900);
+
+  space->AddCollisionBox(400, 950, 200, 50);
+
+  auto rrt = std::make_shared<rrt::Rrt>(space);
+  rrt->set_goal_tolerance(5.0);
+  rrt->set_use_connect(true);
+
+  auto birrt = std::make_shared<rrt::BidirectionalRrt>(space);
+  birrt->set_goal_tolerance(5.0);
+  //birrt->set_use_connect(true);
+
+  current_planner_ = rrt;
+
+  planners_["birrt"] = birrt;
+  planners_["rrt"] = rrt;
 
   setWindowTitle("RRT Visualizer");
   setFixedSize(1000, 1100);
   QVBoxLayout* layout = new QVBoxLayout();
   QPushButton* button = new QPushButton("Compute");
   layout->addWidget(button);
-  RrtVisualizer* visualizer = new RrtVisualizer(*rrt_);
-  layout->addWidget(visualizer);
+  QComboBox* combo_box = new QComboBox();
+  for (const auto& pair : planners_) {
+    combo_box->addItem(pair.first.c_str());
+  }
+  combo_box->setCurrentText("rrt");
+  layout->addWidget(combo_box);
+
+  connect(combo_box, &QComboBox::currentTextChanged, this, &MainWindow::HandleAlgorithmChanged);
+
+  visualizer_ = new RrtVisualizer(rrt.get());
+  layout->addWidget(visualizer_);
 
   QWidget* container = new QWidget();
   container->setLayout(layout);
@@ -31,26 +53,36 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   connect(button, &QPushButton::clicked, this, &MainWindow::HandleButtonClicked);
 
   QTimer* timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, visualizer, &RrtVisualizer::TimerCallback);
+  connect(timer, &QTimer::timeout, visualizer_, &RrtVisualizer::TimerCallback);
   timer->start(50);
 }
 
 MainWindow::~MainWindow() {}
 
 void MainWindow::HandleButtonClicked() {
-  rrt_->Clear();
+  current_planner_->Clear();
 
   auto init = std::make_shared<rrt::Motion2D>();
   init->x = 100;
-  init->y = 100;
+  init->y = 500;
 
   auto goal = std::make_shared<rrt::Motion2D>();
   goal->x = 900;
-  goal->y = 900;
+  goal->y = 500;
 
-  if (rrt_->Solve(init, goal)) {
-    std::cout << "success: " << rrt_->nodes().size() << std::endl;
+  visualizer_->SetInit(init->x, init->y);
+  visualizer_->SetGoal(goal->x, goal->y);
+
+  if (current_planner_->Solve(init, goal)) {
+    std::cout << "success: " << current_planner_->nodes().size() << std::endl;
   } else {
-    std::cout << "failure: " << rrt_->nodes().size() << std::endl;
+    std::cout << "failure: " << current_planner_->nodes().size() << std::endl;
   }
+}
+
+void MainWindow::HandleAlgorithmChanged(const QString& text) {
+  auto algorithm = text.toUtf8().constData();
+  std::cout << "algorithm: " << algorithm << std::endl;
+  current_planner_ = planners_[algorithm];
+  visualizer_->set_planner(current_planner_.get());
 }

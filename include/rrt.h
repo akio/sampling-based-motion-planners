@@ -109,6 +109,19 @@ class LinearSearchNN : public NearestNeighborInterface {
 
 class PlannerInterface {
  public:
+  PlannerInterface() = default;
+  virtual ~PlannerInterface() = default;
+  PlannerInterface(const PlannerInterface&) = delete;
+  PlannerInterface& operator=(const PlannerInterface&) = delete;
+
+  virtual bool Solve(const NodePtr& init, const NodePtr& goal) = 0;
+  virtual void Clear() = 0;
+	virtual const std::vector<NodePtr>& nodes() const = 0;
+	virtual SpacePtr space() const = 0;
+
+  virtual double goal_tolerance() const = 0;
+
+  virtual void set_goal_tolerance(double value) = 0;
 };
 
 enum class RrtStatus {
@@ -117,28 +130,29 @@ enum class RrtStatus {
   kAdvanced,
 };
 
-class Rrt {
+class Rrt : public PlannerInterface {
  public:
-
   Rrt(SpacePtr space);
 
-  bool Solve(const NodePtr& init, const NodePtr& goal);
+  virtual ~Rrt() {}
+
+  bool Solve(const NodePtr& init, const NodePtr& goal) override;
 
   RrtStatus Extend(const NodePtr& x_sample, NodePtr& out_x_new);
 
   RrtStatus Connect(const NodePtr& x_sample, NodePtr& out_x_new);
 
-  void Clear();
+  void Clear() override;
 
-	const std::vector<NodePtr>& nodes() const {
+	const std::vector<NodePtr>& nodes() const override {
 		return nodes_;
 	}
 
-  double goal_tolerance() const {
+  double goal_tolerance() const override {
     return goal_tolerance_;
   }
 
-  void set_goal_tolerance(double value) {
+  void set_goal_tolerance(double value) override {
     goal_tolerance_ = value;
   }
 
@@ -146,7 +160,7 @@ class Rrt {
 
   void set_use_connect(bool value) { use_connect_ = value; }
 
-	SpacePtr space() const { return space_; }
+	SpacePtr space() const override { return space_; }
  private:
   std::vector<NodePtr> nodes_;
 	NearestNeighborPtr nn_;
@@ -156,24 +170,28 @@ class Rrt {
   bool use_connect_{false};
 };
 
-class BidirectionalRrt {
+class BidirectionalRrt : public PlannerInterface {
  public:
   BidirectionalRrt(SpacePtr space);
 
+  virtual ~BidirectionalRrt() {}
+
   bool Solve(const NodePtr& init, const NodePtr& goal);
 
-  RrtStatus Extend(const NodePtr& x_sample, NodePtr& out_x_new);
+  RrtStatus Extend(std::vector<NodePtr>& nodes, const NearestNeighborPtr& nn,
+                   const NodePtr& x_sample, NodePtr& out_x_new);
 
-  RrtStatus Connect(const NodePtr& x_sample, NodePtr& out_x_new);
+  RrtStatus Connect(std::vector<NodePtr>& nodes, const NearestNeighborPtr& nn,
+                    const NodePtr& x_sample, NodePtr& out_x_new);
 
-  void Clear();
+  void Clear() override;
 
 	const std::vector<NodePtr>& nodes() const {
-    std::vector<NodePtr> nodes;
-    nodes.reserve(init_nodes_.size() + goal_nodes_.size());
-    nodes.insert(end(nodes), begin(init_nodes_), end(init_nodes_));
-    nodes.insert(end(nodes), begin(goal_nodes_), end(goal_nodes_));
-		return nodes;
+    nodes_.clear();
+    nodes_.reserve(init_nodes_.size() + goal_nodes_.size());
+    nodes_.insert(end(nodes_), begin(init_nodes_), end(init_nodes_));
+    nodes_.insert(end(nodes_), begin(goal_nodes_), end(goal_nodes_));
+		return nodes_;
 	}
 
   double goal_tolerance() const {
@@ -190,9 +208,11 @@ class BidirectionalRrt {
   bool use_connect2() const { return use_connect2_; }
   void set_use_connect2(bool value) { use_connect2_ = value; }
 
+	SpacePtr space() const override { return space_; }
  private:
   std::vector<NodePtr> init_nodes_;
   std::vector<NodePtr> goal_nodes_;
+  mutable std::vector<NodePtr> nodes_;
 	NearestNeighborPtr init_nn_;
 	NearestNeighborPtr goal_nn_;
 	SpacePtr space_;

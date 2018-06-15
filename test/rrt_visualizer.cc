@@ -6,7 +6,7 @@
 
 #include "rrt.h"
 
-RrtVisualizer::RrtVisualizer(rrt::Rrt& rrt, QWidget* parent) : QWidget(parent), rrt_(rrt) {
+RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent) : QWidget(parent), planner_(planner) {
   setFixedSize(1000, 1000);
 
   QPalette pal = palette();
@@ -42,7 +42,7 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
   painter.setBrush(node_brush_);
   painter.setBackground(background_brush_);
 
-  for (const auto& collision : rrt_.space()->collisions()) {
+  for (const auto& collision : planner_->space()->collisions()) {
     auto p = std::dynamic_pointer_cast<rrt::Box2D>(collision);
     painter.save();
 
@@ -53,7 +53,7 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
     painter.restore();
   }
 
-  for (const auto& node : rrt_.nodes()) {
+  for (const auto& node : planner_->nodes()) {
     auto m = std::dynamic_pointer_cast<rrt::Motion2D>(node);
     painter.drawEllipse(m->x - 1, 1000 - m->y - 1, 3, 3);
     auto parent = m->parent();
@@ -66,11 +66,11 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
 
   painter.setPen(init_pen_);
   painter.setBrush(init_brush_);
-  painter.drawEllipse(100 - 4, 1000 - 100 - 4, 9, 9);
+  painter.drawEllipse(init_x_ - 4, 1000 - init_y_ - 4, 9, 9);
 
   painter.setPen(goal_pen_);
   painter.setBrush(goal_brush_);
-  painter.drawEllipse(900 - 4, 1000 - 900 - 4, 9, 9);
+  painter.drawEllipse(goal_x_ - 4, 1000 - goal_y_ - 4, 9, 9);
 
   painter.end();
 }
