@@ -1,0 +1,21 @@
+cc_library(
+	name = "rrt",
+	hdrs = [
+      "rrt.h",
+      "planner.h",
+       "nearest_neighbor.h",
+      "rrt_planner.h",
+      "birrt_planner.h",
+      "space.h",
+      "space_2d.h",
+    ],
+	srcs = [
+       "rrt.cc",
+       "nearest_neighbor.cc",
+       "rrt_planner.cc",
+       "birrt_planner.cc",
+       "space_2d.cc",
+    ],
+	includes = ["."],
+	visibility = ["//visibility:public"],
+)

@@ -10,19 +10,23 @@
 #include "QtWidgets/QComboBox"
 #include "QtWidgets/QRadioButton"
 
+#include "space_2d.h"
+#include "rrt_planner.h"
+#include "birrt_planner.h"
+
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   auto space = std::make_shared<rrt::Space2D>(0, 1000, 0, 1000, 10.0);
-  space->AddCollisionBox(400, 0, 200, 900);
+  space->add_collision_box(400, 0, 200, 900);
 
-  space->AddCollisionBox(400, 950, 200, 50);
+  space->add_collision_box(400, 950, 200, 50);
 
-  auto rrt = std::make_shared<rrt::Rrt>(space);
-  rrt->set_goal_tolerance(5.0);
-  rrt->set_use_connect(true);
+  auto rrt = std::make_shared<rrt::RrtPlanner>(space);
+  rrt->set_goal_tolerance(10.0);
+  rrt->set_use_connect(false);
 
-  auto birrt = std::make_shared<rrt::BidirectionalRrt>(space);
+  auto birrt = std::make_shared<rrt::BidirectionalRrtPlanner>(space);
   birrt->set_goal_tolerance(5.0);
-  //birrt->set_use_connect(true);
 
   current_planner_ = rrt;
 
@@ -60,7 +64,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 MainWindow::~MainWindow() {}
 
 void MainWindow::HandleButtonClicked() {
-  current_planner_->Clear();
+  current_planner_->reset();
 
   auto init = std::make_shared<rrt::Motion2D>();
   init->x = 100;
@@ -73,7 +77,7 @@ void MainWindow::HandleButtonClicked() {
   visualizer_->SetInit(init->x, init->y);
   visualizer_->SetGoal(goal->x, goal->y);
 
-  if (current_planner_->Solve(init, goal)) {
+  if (current_planner_->solve(init, goal)) {
     std::cout << "success: " << current_planner_->nodes().size() << std::endl;
   } else {
     std::cout << "failure: " << current_planner_->nodes().size() << std::endl;

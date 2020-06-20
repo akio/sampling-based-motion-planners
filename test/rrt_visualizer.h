@@ -3,7 +3,7 @@
 #include <QtGui/QPen>
 #include <QtGui/QBrush>
 
-#include "rrt.h"
+#include "planner.h"
 
 class RrtVisualizer : public QWidget {
   Q_OBJECT
@@ -33,6 +33,7 @@ class RrtVisualizer : public QWidget {
   QFont text_font_;
   QPen text_pen_;
   QPen edge_pen_;
+  QPen solution_pen_;
   QPen node_pen_;
   QBrush node_brush_;
   QPen init_pen_;

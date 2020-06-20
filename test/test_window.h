@@ -5,7 +5,6 @@
 #include <QtWidgets/QApplication>
 
 #include "rrt_visualizer.h"
-#include "rrt.h"
 
 class MainWindow : public QMainWindow {
   Q_OBJECT

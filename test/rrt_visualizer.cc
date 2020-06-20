@@ -4,9 +4,11 @@
 
 #include "QtGui/QPainter"
 
-#include "rrt.h"
+#include "space_2d.h"
 
-RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent) : QWidget(parent), planner_(planner) {
+RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent)
+  : QWidget(parent),
+    planner_(planner) {
   setFixedSize(1000, 1000);
 
   QPalette pal = palette();
@@ -20,6 +22,8 @@ RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent) : 
   node_pen_ = QPen(Qt::black);
   node_brush_ = QBrush(Qt::black);
   edge_pen_ = QPen(Qt::gray);
+  solution_pen_ = QPen(Qt::green);
+  solution_pen_.setWidth(3);
   init_pen_ = QPen(Qt::red);
   init_brush_ = QBrush(Qt::red);
   goal_pen_ = QPen(Qt::blue);
@@ -60,6 +64,17 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
     if (parent) {
       auto p = std::dynamic_pointer_cast<rrt::Motion2D>(parent);
       painter.setPen(edge_pen_);
+      painter.drawLine(m->x, 1000 - m->y, p->x, 1000 - p->y);
+    }
+  }
+
+  for (const auto& node : planner_->solution()) {
+    auto m = std::dynamic_pointer_cast<rrt::Motion2D>(node);
+    painter.drawEllipse(m->x - 1, 1000 - m->y - 1, 3, 3);
+    auto parent = m->parent();
+    if (parent) {
+      auto p = std::dynamic_pointer_cast<rrt::Motion2D>(parent);
+      painter.setPen(solution_pen_);
       painter.drawLine(m->x, 1000 - m->y, p->x, 1000 - p->y);
     }
   }
