@@ -13,25 +13,37 @@
 #include "space_2d.h"
 #include "rrt_planner.h"
 #include "birrt_planner.h"
+#include "rrt_star_planner.h"
+#include "birrt_star_planner.h"
 
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   auto space = std::make_shared<rrt::Space2D>(0, 1000, 0, 1000, 10.0);
-  space->add_collision_box(400, 0, 200, 900);
-
-  space->add_collision_box(400, 950, 200, 50);
+  space->add_collision_box(400, 100, 200, 800);
+  //space->add_collision_box(400, 950, 200, 50);
 
   auto rrt = std::make_shared<rrt::RrtPlanner>(space);
-  rrt->set_goal_tolerance(10.0);
+  rrt->set_goal_tolerance(5.0);
   rrt->set_use_connect(false);
 
   auto birrt = std::make_shared<rrt::BidirectionalRrtPlanner>(space);
   birrt->set_goal_tolerance(5.0);
 
+  auto rrt_star = std::make_shared<rrt::RrtStarPlanner>(space);
+  rrt_star->set_goal_tolerance(5.0);
+  rrt_star->set_gamma(300.0);
+  //rrt_star->set_max_samples(20);
+
+  auto birrt_star = std::make_shared<rrt::BiRrtStarPlanner>(space);
+  birrt_star->set_goal_tolerance(5.0);
+  birrt_star->set_gamma(50.0);
+
   current_planner_ = rrt;
 
-  planners_["birrt"] = birrt;
-  planners_["rrt"] = rrt;
+  planners_["RRT"] = rrt;
+  planners_["BiRRT"] = birrt;
+  planners_["RRT*"] = rrt_star;
+  planners_["BiRRT*"] = birrt_star;
 
   setWindowTitle("RRT Visualizer");
   setFixedSize(1000, 1100);
@@ -42,7 +54,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   for (const auto& pair : planners_) {
     combo_box->addItem(pair.first.c_str());
   }
-  combo_box->setCurrentText("rrt");
+  combo_box->setCurrentText("RRT");
   layout->addWidget(combo_box);
 
   connect(combo_box, &QComboBox::currentTextChanged, this, &MainWindow::HandleAlgorithmChanged);
@@ -55,6 +67,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   setCentralWidget(container);
 
   connect(button, &QPushButton::clicked, this, &MainWindow::HandleButtonClicked);
+
+  auto init = std::make_shared<rrt::Motion2D>();
+  init->x = 100;
+  init->y = 500;
+
+  auto goal = std::make_shared<rrt::Motion2D>();
+  goal->x = 900;
+  goal->y = 500;
+
+  visualizer_->SetInit(init->x, init->y);
+  visualizer_->SetGoal(goal->x, goal->y);
 
   QTimer* timer = new QTimer(this);
   connect(timer, &QTimer::timeout, visualizer_, &RrtVisualizer::TimerCallback);

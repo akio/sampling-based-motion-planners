@@ -19,11 +19,13 @@ RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent)
 
   text_font_.setPixelSize(50);
   text_pen_ = QPen(Qt::black);
-  node_pen_ = QPen(Qt::black);
-  node_brush_ = QBrush(Qt::black);
+  node_pen_ = QPen(Qt::gray);
+  node_brush_ = QBrush(Qt::gray);
   edge_pen_ = QPen(Qt::gray);
   solution_pen_ = QPen(Qt::green);
   solution_pen_.setWidth(3);
+  smooth_solution_pen_ = QPen(Qt::magenta);
+  smooth_solution_pen_.setWidth(3);
   init_pen_ = QPen(Qt::red);
   init_brush_ = QBrush(Qt::red);
   goal_pen_ = QPen(Qt::blue);
@@ -46,6 +48,7 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
   painter.setBrush(node_brush_);
   painter.setBackground(background_brush_);
 
+  // Draw collision objects
   for (const auto& collision : planner_->space()->collisions()) {
     auto p = std::dynamic_pointer_cast<rrt::Box2D>(collision);
     painter.save();
@@ -57,8 +60,11 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
     painter.restore();
   }
 
+  // Draw graph
   for (const auto& node : planner_->nodes()) {
     auto m = std::dynamic_pointer_cast<rrt::Motion2D>(node);
+    painter.setPen(node_pen_);
+    painter.setBrush(node_brush_);
     painter.drawEllipse(m->x - 1, 1000 - m->y - 1, 3, 3);
     auto parent = m->parent();
     if (parent) {
@@ -68,13 +74,28 @@ void RrtVisualizer::paintEvent(QPaintEvent* event) {
     }
   }
 
+  // Draw solution
+  painter.setPen(solution_pen_);
   for (const auto& node : planner_->solution()) {
     auto m = std::dynamic_pointer_cast<rrt::Motion2D>(node);
     painter.drawEllipse(m->x - 1, 1000 - m->y - 1, 3, 3);
     auto parent = m->parent();
     if (parent) {
       auto p = std::dynamic_pointer_cast<rrt::Motion2D>(parent);
-      painter.setPen(solution_pen_);
+      painter.drawLine(m->x, 1000 - m->y, p->x, 1000 - p->y);
+    }
+  }
+
+  // Execute path pruning
+  auto path = planner_->solution();
+  auto new_path = rrt::path_pruning(planner_->space(), path);
+  painter.setPen(smooth_solution_pen_);
+  for (const auto& node : new_path) {
+    auto m = std::dynamic_pointer_cast<rrt::Motion2D>(node);
+    painter.drawEllipse(m->x - 1, 1000 - m->y - 1, 3, 3);
+    auto parent = m->parent();
+    if (parent) {
+      auto p = std::dynamic_pointer_cast<rrt::Motion2D>(parent);
       painter.drawLine(m->x, 1000 - m->y, p->x, 1000 - p->y);
     }
   }

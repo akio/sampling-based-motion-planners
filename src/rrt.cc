@@ -17,10 +17,10 @@ void Rrt::initialize(const NodePtr& x) {
 
 Rrt::Status Rrt::extend(const NodePtr& x_sample, NodePtr& x_new_out) {
   assert(!nodes_.empty());
-  auto x_near = nn_->query(x_sample);
+  auto x_near = nn_->find_nearest(x_sample);
   auto x_new = space_->steer(x_near, x_sample);
   if (x_new) {
-    if (space_->has_collision(x_new)) {
+    if (!space_->collision_free(x_new)) {
       return Status::kCollided;
     }
     nn_->add(x_new);
@@ -48,6 +48,7 @@ void Rrt::reset() {
   nodes_.clear();
 	nn_->reset();
 }
+
 
 
 }  // namespace rrt

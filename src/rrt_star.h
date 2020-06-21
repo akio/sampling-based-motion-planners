@@ -10,7 +10,7 @@
 
 namespace rrt {
 
-class Rrt {
+class RrtStar {
  public:
   enum class Status {
     kTrapped,
@@ -19,10 +19,10 @@ class Rrt {
     kAdvanced,
   };
 
-  Rrt(SpacePtr space, NearestNeighborPtr nn);
+  RrtStar(SpacePtr space, NearestNeighborPtr nn);
 
-  Rrt(const Rrt&) = delete;
-  Rrt& operator=(const Rrt&) = delete;
+  RrtStar(const RrtStar&) = delete;
+  RrtStar& operator=(const RrtStar&) = delete;
 
   void initialize(const NodePtr& x);
 
@@ -37,7 +37,6 @@ class Rrt {
 
   void reset();
  private:
-  double card();
 
   std::vector<NodePtr> nodes_;
 	NearestNeighborPtr nn_;

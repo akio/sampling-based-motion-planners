@@ -1,7 +1,5 @@
 #include "space_2d.h"
 
-#include <random>
-
 namespace rrt {
 
 Box2D::Box2D(double x0, double y0, double width, double height)
@@ -31,26 +29,23 @@ Space2D::Space2D(double xmin, double xmax, double ymin, double ymax, double cont
 }
 
 NodePtr Space2D::sample() const {
-	std::random_device seed_gen;
-
-	std::default_random_engine engine(seed_gen());
 	std::uniform_real_distribution<> x_dist(xmin_, xmax_);
 	std::uniform_real_distribution<> y_dist(ymin_, ymax_);
 	auto n = std::make_shared<Motion2D>();
-	n->x = x_dist(engine);
-	n->y = y_dist(engine);
+	n->x = x_dist(random_engine_);
+	n->y = y_dist(random_engine_);
 	n->u = 0;
 	n->set_parent(nullptr);
 	return std::static_pointer_cast<NodeInterface>(n);
 }
 
 NodePtr Space2D::steer(NodePtr origin, NodePtr target) const {
-	auto n0 = std::dynamic_pointer_cast<Motion2D>(origin);
-	auto n1 = std::dynamic_pointer_cast<Motion2D>(target);
+	auto n0 = std::static_pointer_cast<Motion2D>(origin);
+	auto n1 = std::static_pointer_cast<Motion2D>(target);
 
 	double u = n1->x - n0->x;
 	double v = n1->y - n0->y;
-  double norm = std::sqrt(u * u + v * v);
+  double norm = std::hypot(u, v);
 
 	double coeff = control_ / norm;
 	if (coeff > 1.0) {
@@ -69,13 +64,43 @@ NodePtr Space2D::steer(NodePtr origin, NodePtr target) const {
 }
 
 
-bool Space2D::has_collision(NodePtr node) const {
+bool Space2D::collision_free(NodePtr node) const {
   for (auto c : collisions_) {
     if (c->collide(node)) {
-      return true;
+      return false;
     }
   }
-  return false;
+  return true;
+}
+
+// Line search
+bool Space2D::collision_free_path(NodePtr node_a, NodePtr node_b) const {
+	auto n0 = std::static_pointer_cast<Motion2D>(node_a);
+	auto n1 = std::static_pointer_cast<Motion2D>(node_b);
+  auto work = std::make_shared<Motion2D>();
+
+	double u = n1->x - n0->x;
+	double v = n1->y - n0->y;
+  double norm = std::hypot(u, v);
+
+  double resolution = 0.5;
+  double control_step = resolution * control_;
+
+  work->x = n0->x;
+  work->y = n0->y;
+  int i = 0;
+  while (true) {
+    double t = control_step * i / norm;
+    if (t > 1.0) {
+      return collision_free(node_b);
+    }
+    work->x = n0->x + u * t;
+    work->y = n0->y + v * t;
+    if (!collision_free(work)) {
+      return false;
+    }
+    ++i;
+  }
 }
 
 void Space2D::add_collision_box(double x0, double y0, double width, double height) {

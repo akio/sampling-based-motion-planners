@@ -2,18 +2,19 @@
 
 #include <cassert>
 #include <vector>
+#include <limits>
 
-#include "rrt.h"
+#include "rrt_star.h"
 #include "planner.h"
 #include "nearest_neighbor.h"
 
 namespace rrt {
 
-class BidirectionalRrtPlanner : public PlannerInterface {
+class BiRrtStarPlanner : public PlannerInterface {
  public:
-  BidirectionalRrtPlanner(SpacePtr space);
+  BiRrtStarPlanner(SpacePtr space);
 
-  virtual ~BidirectionalRrtPlanner() {}
+  virtual ~BiRrtStarPlanner() {}
 
   bool solve(const NodePtr& init, const NodePtr& goal);
 
@@ -36,14 +37,19 @@ class BidirectionalRrtPlanner : public PlannerInterface {
   }
 
 	SpacePtr space() const override { return space_; }
+
+  void set_gamma(double value) {
+    init_tree_->set_gamma(value);
+    goal_tree_->set_gamma(value);
+  }
  private:
 	SpacePtr space_;
-  std::unique_ptr<Rrt> init_tree_;
-  std::unique_ptr<Rrt> goal_tree_;
+  std::unique_ptr<RrtStar> init_tree_;
+  std::unique_ptr<RrtStar> goal_tree_;
   std::vector<NodePtr> nodes_;
   std::vector<NodePtr> solution_;
   int max_samples_;
-  double goal_tolerance_{0.0};
+  double goal_tolerance_{std::numeric_limits<double>::epsilon()};
 };
 
 }  // namespace rrt

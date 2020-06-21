@@ -34,6 +34,7 @@ class RrtVisualizer : public QWidget {
   QPen text_pen_;
   QPen edge_pen_;
   QPen solution_pen_;
+  QPen smooth_solution_pen_;
   QPen node_pen_;
   QBrush node_brush_;
   QPen init_pen_;

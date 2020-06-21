@@ -1,4 +1,4 @@
-#include "birrt_planner.h"
+#include "birrt_star_planner.h"
 
 #include <cassert>
 #include <limits>
@@ -6,14 +6,14 @@
 
 namespace rrt {
 
-BidirectionalRrtPlanner::BidirectionalRrtPlanner(SpacePtr space)
+BiRrtStarPlanner::BiRrtStarPlanner(SpacePtr space)
     : space_(space),
-      init_tree_(new Rrt(space, std::make_shared<LinearSearchNN>())),
-      goal_tree_(new Rrt(space, std::make_shared<LinearSearchNN>())),
+      init_tree_(new RrtStar(space, std::make_shared<LinearSearchNN>())),
+      goal_tree_(new RrtStar(space, std::make_shared<LinearSearchNN>())),
       max_samples_(-1) {
 }
 
-bool BidirectionalRrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
+bool BiRrtStarPlanner::solve(const NodePtr& init, const NodePtr& goal) {
   init_tree_->initialize(init);
   goal_tree_->initialize(goal);
 
@@ -26,9 +26,9 @@ bool BidirectionalRrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
 		NodePtr x_rand = space_->sample();
     NodePtr x_new;
     auto status = init_tree_->extend(x_rand, x_new);
-    if (status != Rrt::Status::kTrapped && status != Rrt::Status::kCollided) {
+    if (status != RrtStar::Status::kTrapped && status != RrtStar::Status::kCollided) {
       NodePtr x_new2;
-      if (goal_tree_->connect(x_new, x_new2) == Rrt::Status::kReached) {
+      if (goal_tree_->connect(x_new, x_new2) == RrtStar::Status::kReached) {
         auto init_nodes = init_tree_->nodes();
         auto goal_nodes = goal_tree_->nodes();
         nodes_.clear();
@@ -56,7 +56,7 @@ bool BidirectionalRrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
   return false;
 }
 
-void BidirectionalRrtPlanner::reset() {
+void BiRrtStarPlanner::reset() {
   init_tree_->reset();
   goal_tree_->reset();
   nodes_.clear();
