@@ -1,8 +1,8 @@
 #include "birrt_star_planner.h"
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
-#include <algorithm>
 
 namespace rrt {
 
@@ -10,8 +10,7 @@ BiRrtStarPlanner::BiRrtStarPlanner(SpacePtr space)
     : space_(space),
       init_tree_(new RrtStar(space, std::make_shared<LinearSearchNN>())),
       goal_tree_(new RrtStar(space, std::make_shared<LinearSearchNN>())),
-      max_samples_(-1) {
-}
+      max_samples_(-1) {}
 
 bool BiRrtStarPlanner::solve(const NodePtr& init, const NodePtr& goal) {
   init_tree_->initialize(init);
@@ -23,10 +22,11 @@ bool BiRrtStarPlanner::solve(const NodePtr& init, const NodePtr& goal) {
       break;
     }
     ++i;
-		NodePtr x_rand = space_->sample();
+    NodePtr x_rand = space_->sample();
     NodePtr x_new;
     auto status = init_tree_->extend(x_rand, x_new);
-    if (status != RrtStar::Status::kTrapped && status != RrtStar::Status::kCollided) {
+    if (status != RrtStar::Status::kTrapped &&
+        status != RrtStar::Status::kCollided) {
       NodePtr x_new2;
       if (goal_tree_->connect(x_new, x_new2) == RrtStar::Status::kReached) {
         auto init_nodes = init_tree_->nodes();

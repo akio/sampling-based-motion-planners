@@ -3,12 +3,10 @@
 #include <iostream>
 
 #include "QtGui/QPainter"
-
 #include "space_2d.h"
 
 RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent)
-  : QWidget(parent),
-    planner_(planner) {
+    : QWidget(parent), planner_(planner) {
   setFixedSize(1000, 1000);
 
   QPalette pal = palette();
@@ -35,9 +33,7 @@ RrtVisualizer::RrtVisualizer(rrt::PlannerInterface* planner, QWidget* parent)
   background_brush_ = QBrush(Qt::white);
 }
 
-void RrtVisualizer::TimerCallback() {
-  update();
-}
+void RrtVisualizer::TimerCallback() { update(); }
 
 void RrtVisualizer::paintEvent(QPaintEvent* event) {
   QPainter painter;

@@ -1,14 +1,12 @@
+#include "rrt.h"
+
+#include <cassert>
 #include <iostream>
 #include <random>
-#include <cassert>
-
-#include "rrt.h"
 
 namespace rrt {
 
-
 Rrt::Rrt(SpacePtr space, NearestNeighborPtr nn) : nn_(nn), space_(space) {}
-
 
 void Rrt::initialize(const NodePtr& x) {
   nodes_.push_back(x);
@@ -46,9 +44,7 @@ Rrt::Status Rrt::connect(const NodePtr& x_sample, NodePtr& x_new_out) {
 
 void Rrt::reset() {
   nodes_.clear();
-	nn_->reset();
+  nn_->reset();
 }
-
-
 
 }  // namespace rrt

@@ -7,9 +7,7 @@ namespace rrt {
 
 RrtStarPlanner::RrtStarPlanner(SpacePtr space)
     : space_(space),
-      tree_(new RrtStar(space, std::make_shared<LinearSearchNN>()))
-{
-}
+      tree_(new RrtStar(space, std::make_shared<LinearSearchNN>())) {}
 
 bool RrtStarPlanner::solve(const NodePtr& init, const NodePtr& goal) {
   tree_->initialize(init);
@@ -20,7 +18,7 @@ bool RrtStarPlanner::solve(const NodePtr& init, const NodePtr& goal) {
       break;
     }
     ++i;
-		NodePtr x_random = space_->sample();
+    NodePtr x_random = space_->sample();
     NodePtr x_new;
     (void)tree_->extend(x_random, x_new);
 
@@ -39,7 +37,7 @@ bool RrtStarPlanner::solve(const NodePtr& init, const NodePtr& goal) {
         return true;
       }
     }
-	}
+  }
   nodes_.clear();
   nodes_ = tree_->nodes();
   return false;

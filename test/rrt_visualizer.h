@@ -1,7 +1,6 @@
-#include <QtWidgets/QWidget>
-
-#include <QtGui/QPen>
 #include <QtGui/QBrush>
+#include <QtGui/QPen>
+#include <QtWidgets/QWidget>
 
 #include "planner.h"
 
@@ -12,9 +11,7 @@ class RrtVisualizer : public QWidget {
 
   void TimerCallback();
 
-  void set_planner(rrt::PlannerInterface* value) {
-    planner_ = value;
-  }
+  void set_planner(rrt::PlannerInterface* value) { planner_ = value; }
 
   void SetInit(int x, int y) {
     init_x_ = x;

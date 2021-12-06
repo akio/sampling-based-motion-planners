@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cmath>
-#include <vector>
+#include <iostream>
 #include <memory>
 #include <string>
-#include <iostream>
+#include <vector>
 
 #include "space.h"
 
@@ -24,20 +24,19 @@ class PlannerInterface {
 
   virtual void reset() = 0;
 
-	virtual const std::vector<NodePtr>& nodes() const = 0;
+  virtual const std::vector<NodePtr>& nodes() const = 0;
 
-	virtual const std::vector<NodePtr>& solution() const = 0;
+  virtual const std::vector<NodePtr>& solution() const = 0;
 
-	virtual SpacePtr space() const = 0;
+  virtual SpacePtr space() const = 0;
 
   virtual double goal_tolerance() const = 0;
 
   virtual void set_goal_tolerance(double value) = 0;
-
-
 };
 
-inline std::vector<NodePtr> path_pruning(SpacePtr space, std::vector<NodePtr> path) {
+inline std::vector<NodePtr> path_pruning(SpacePtr space,
+                                         std::vector<NodePtr> path) {
   std::vector<NodePtr> new_path;
   for (int i = 0; i < path.size(); ++i) {
     auto new_node = path[i]->clone();
@@ -63,5 +62,3 @@ inline std::vector<NodePtr> path_pruning(SpacePtr space, std::vector<NodePtr> pa
 }
 
 }  // namespace rrt
-
-

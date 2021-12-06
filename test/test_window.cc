@@ -4,23 +4,21 @@
 #include <map>
 
 #include "QtCore/QTimer"
+#include "QtWidgets/QComboBox"
 #include "QtWidgets/QGridLayout"
 #include "QtWidgets/QHBoxLayout"
 #include "QtWidgets/QPushButton"
-#include "QtWidgets/QComboBox"
 #include "QtWidgets/QRadioButton"
-
-#include "space_2d.h"
-#include "rrt_planner.h"
 #include "birrt_planner.h"
-#include "rrt_star_planner.h"
 #include "birrt_star_planner.h"
-
+#include "rrt_planner.h"
+#include "rrt_star_planner.h"
+#include "space_2d.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   auto space = std::make_shared<rrt::Space2D>(0, 1000, 0, 1000, 10.0);
   space->add_collision_box(400, 100, 200, 800);
-  //space->add_collision_box(400, 950, 200, 50);
+  // space->add_collision_box(400, 950, 200, 50);
 
   auto rrt = std::make_shared<rrt::RrtPlanner>(space);
   rrt->set_goal_tolerance(5.0);
@@ -32,7 +30,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   auto rrt_star = std::make_shared<rrt::RrtStarPlanner>(space);
   rrt_star->set_goal_tolerance(5.0);
   rrt_star->set_gamma(300.0);
-  //rrt_star->set_max_samples(20);
+  // rrt_star->set_max_samples(20);
 
   auto birrt_star = std::make_shared<rrt::BiRrtStarPlanner>(space);
   birrt_star->set_goal_tolerance(5.0);
@@ -57,7 +55,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   combo_box->setCurrentText("RRT");
   layout->addWidget(combo_box);
 
-  connect(combo_box, &QComboBox::currentTextChanged, this, &MainWindow::HandleAlgorithmChanged);
+  connect(combo_box, &QComboBox::currentTextChanged, this,
+          &MainWindow::HandleAlgorithmChanged);
 
   visualizer_ = new RrtVisualizer(rrt.get());
   layout->addWidget(visualizer_);
@@ -66,7 +65,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
   container->setLayout(layout);
   setCentralWidget(container);
 
-  connect(button, &QPushButton::clicked, this, &MainWindow::HandleButtonClicked);
+  connect(button, &QPushButton::clicked, this,
+          &MainWindow::HandleButtonClicked);
 
   auto init = std::make_shared<rrt::Motion2D>();
   init->x = 100;

@@ -1,12 +1,10 @@
-#include "planner.h"
-
 #include <cassert>
-#include <vector>
 #include <limits>
+#include <vector>
 
-#include "rrt_star.h"
-#include "planner.h"
 #include "nearest_neighbor.h"
+#include "planner.h"
+#include "rrt_star.h"
 
 namespace rrt {
 
@@ -20,30 +18,23 @@ class BiRrtStarPlanner : public PlannerInterface {
 
   void reset() override;
 
-	const std::vector<NodePtr>& nodes() const {
-		return nodes_;
-	}
+  const std::vector<NodePtr>& nodes() const { return nodes_; }
 
-	const std::vector<NodePtr>& solution() const override {
-		return solution_;
-	}
+  const std::vector<NodePtr>& solution() const override { return solution_; }
 
-  double goal_tolerance() const {
-    return goal_tolerance_;
-  }
+  double goal_tolerance() const { return goal_tolerance_; }
 
-  void set_goal_tolerance(double value) {
-    goal_tolerance_ = value;
-  }
+  void set_goal_tolerance(double value) { goal_tolerance_ = value; }
 
-	SpacePtr space() const override { return space_; }
+  SpacePtr space() const override { return space_; }
 
   void set_gamma(double value) {
     init_tree_->set_gamma(value);
     goal_tree_->set_gamma(value);
   }
+
  private:
-	SpacePtr space_;
+  SpacePtr space_;
   std::unique_ptr<RrtStar> init_tree_;
   std::unique_ptr<RrtStar> goal_tree_;
   std::vector<NodePtr> nodes_;

@@ -1,8 +1,8 @@
 #include "birrt_planner.h"
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
-#include <algorithm>
 
 namespace rrt {
 
@@ -10,8 +10,7 @@ BidirectionalRrtPlanner::BidirectionalRrtPlanner(SpacePtr space)
     : space_(space),
       init_tree_(new Rrt(space, std::make_shared<LinearSearchNN>())),
       goal_tree_(new Rrt(space, std::make_shared<LinearSearchNN>())),
-      max_samples_(-1) {
-}
+      max_samples_(-1) {}
 
 bool BidirectionalRrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
   init_tree_->initialize(init);
@@ -23,7 +22,7 @@ bool BidirectionalRrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
       break;
     }
     ++i;
-		NodePtr x_rand = space_->sample();
+    NodePtr x_rand = space_->sample();
     NodePtr x_new;
     auto status = init_tree_->extend(x_rand, x_new);
     if (status != Rrt::Status::kTrapped && status != Rrt::Status::kCollided) {

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cmath>
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace rrt {
 
@@ -11,11 +11,12 @@ class NodeInterface {
  public:
   virtual double distance(const NodeInterface& node) const = 0;
 
-  virtual std::shared_ptr<NodeInterface> midpoint(const NodeInterface& node) const = 0;
+  virtual std::shared_ptr<NodeInterface> midpoint(
+      const NodeInterface& node) const = 0;
 
-	virtual std::shared_ptr<NodeInterface> parent() const = 0;
+  virtual std::shared_ptr<NodeInterface> parent() const = 0;
 
-	virtual void set_parent(std::shared_ptr<NodeInterface> parent) = 0;
+  virtual void set_parent(std::shared_ptr<NodeInterface> parent) = 0;
 
   virtual double cost() const = 0;
 
@@ -23,7 +24,6 @@ class NodeInterface {
 };
 
 typedef std::shared_ptr<NodeInterface> NodePtr;
-
 
 class CollisionInterface {
  public:
@@ -34,9 +34,9 @@ typedef std::shared_ptr<CollisionInterface> CollisionPtr;
 
 class SpaceInterface {
  public:
-	virtual NodePtr sample() const = 0;
+  virtual NodePtr sample() const = 0;
 
-	virtual NodePtr steer(NodePtr origin, NodePtr target) const = 0;
+  virtual NodePtr steer(NodePtr origin, NodePtr target) const = 0;
 
   virtual bool collision_free(NodePtr node) const = 0;
 
@@ -52,5 +52,3 @@ class SpaceInterface {
 typedef std::shared_ptr<SpaceInterface> SpacePtr;
 
 }  // namespace rrt
-
-

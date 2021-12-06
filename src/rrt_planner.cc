@@ -8,9 +8,7 @@ namespace rrt {
 RrtPlanner::RrtPlanner(SpacePtr space)
     : space_(space),
       tree_(new Rrt(space, std::make_shared<LinearSearchNN>())),
-      max_samples_(-1) {
-
-}
+      max_samples_(-1) {}
 
 bool RrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
   tree_->initialize(init);
@@ -21,7 +19,7 @@ bool RrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
       break;
     }
     ++i;
-		NodePtr x_random = space_->sample();
+    NodePtr x_random = space_->sample();
     NodePtr x_new;
     Rrt::Status status;
     if (use_connect_) {
@@ -45,7 +43,7 @@ bool RrtPlanner::solve(const NodePtr& init, const NodePtr& goal) {
         return true;
       }
     }
-	}
+  }
   return false;
 }
 

@@ -1,12 +1,12 @@
 #pragma once
 
 #include <cmath>
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "space.h"
 #include "nearest_neighbor.h"
+#include "space.h"
 
 namespace rrt {
 
@@ -36,14 +36,14 @@ class Rrt {
   void set_gamma(double value) { gamma_ = value; }
 
   void reset();
+
  private:
   double card();
 
   std::vector<NodePtr> nodes_;
-	NearestNeighborPtr nn_;
-	SpacePtr space_;
+  NearestNeighborPtr nn_;
+  SpacePtr space_;
   double gamma_ = 1.0;
 };
 
 }  // namespace rrt
-
